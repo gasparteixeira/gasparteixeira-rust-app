@@ -4,8 +4,10 @@ use tokio_postgres::{Client, NoTls};
 /// Database configuration and initialization module
 /// Following Single Responsibility Principle - this module only handles database setup
 
+// Use 127.0.0.1 instead of localhost to ensure TCP connection to Docker container
+// localhost might try Unix socket which could connect to local PostgreSQL if running
 const DB_CONNECTION_STRING: &str =
-    "host=localhost user=postgres password=postGr3s1245xSDI dbname=rust_app_db";
+    "host=127.0.0.1 user=postgres password=postGr3s1245xSDI dbname=rust_app_db port=5431";
 
 const SCHEMA_INIT_SQL: &str = "CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
