@@ -41,6 +41,7 @@ impl<T: UserApiClient> UserService for UserServiceImpl<T> {
         let request = CreateUserRequest {
             name: state.name.clone(),
             email: state.email.clone(),
+            password: state.password.clone(),
         };
 
         self.api_client.create_user(request, callback);
@@ -57,6 +58,7 @@ impl<T: UserApiClient> UserService for UserServiceImpl<T> {
                 id,
                 name: state.name.clone(),
                 email: state.email.clone(),
+                password: state.password.clone(),
             };
 
             self.api_client.update_user(request, callback);
@@ -154,24 +156,36 @@ mod tests {
 
     #[test]
     fn test_valid_state_for_create() {
-        let valid_state =
-            UserFormState::with_values("John".to_string(), "john@example.com".to_string(), None);
+        let valid_state = UserFormState::with_values(
+            "John".to_string(),
+            "john@example.com".to_string(),
+            "password123".to_string(),
+            None,
+        );
         assert!(valid_state.is_valid());
         assert!(!valid_state.is_editing());
     }
 
     #[test]
     fn test_valid_state_for_update() {
-        let valid_state =
-            UserFormState::with_values("John".to_string(), "john@example.com".to_string(), Some(1));
+        let valid_state = UserFormState::with_values(
+            "John".to_string(),
+            "john@example.com".to_string(),
+            "password123".to_string(),
+            Some(1),
+        );
         assert!(valid_state.is_valid());
         assert!(valid_state.is_editing());
     }
 
     #[test]
     fn test_invalid_state_without_editing_id() {
-        let state_without_id =
-            UserFormState::with_values("John".to_string(), "john@example.com".to_string(), None);
+        let state_without_id = UserFormState::with_values(
+            "John".to_string(),
+            "john@example.com".to_string(),
+            "password123".to_string(),
+            None,
+        );
         assert!(state_without_id.editing_id.is_none());
     }
 
@@ -182,33 +196,45 @@ mod tests {
 
     #[test]
     fn test_create_request_from_state() {
-        let state =
-            UserFormState::with_values("John".to_string(), "john@example.com".to_string(), None);
+        let state = UserFormState::with_values(
+            "John".to_string(),
+            "john@example.com".to_string(),
+            "password123".to_string(),
+            None,
+        );
 
         let request = CreateUserRequest {
             name: state.name.clone(),
             email: state.email.clone(),
+            password: state.password.clone(),
         };
 
         assert_eq!(request.name, "John");
         assert_eq!(request.email, "john@example.com");
+        assert_eq!(request.password, "password123");
     }
 
     #[test]
     fn test_update_request_from_state() {
-        let state =
-            UserFormState::with_values("Jane".to_string(), "jane@example.com".to_string(), Some(5));
+        let state = UserFormState::with_values(
+            "Jane".to_string(),
+            "jane@example.com".to_string(),
+            "securepass".to_string(),
+            Some(5),
+        );
 
         if let Some(id) = state.editing_id {
             let request = UpdateUserRequest {
                 id,
                 name: state.name.clone(),
                 email: state.email.clone(),
+                password: state.password.clone(),
             };
 
             assert_eq!(request.id, 5);
             assert_eq!(request.name, "Jane");
             assert_eq!(request.email, "jane@example.com");
+            assert_eq!(request.password, "securepass");
         } else {
             panic!("Expected editing_id to be Some");
         }

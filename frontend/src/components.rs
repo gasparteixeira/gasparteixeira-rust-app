@@ -10,9 +10,11 @@ use yew::prelude::*;
 pub struct UserFormProps {
     pub name: String,
     pub email: String,
+    pub password: String,
     pub is_editing: bool,
     pub on_name_change: Callback<String>,
     pub on_email_change: Callback<String>,
+    pub on_password_change: Callback<String>,
     pub on_submit: Callback<()>,
     pub message: String,
 }
@@ -35,6 +37,14 @@ pub fn user_form(props: &UserFormProps) -> Html {
         })
     };
 
+    let on_password_input = {
+        let on_password_change = props.on_password_change.clone();
+        Callback::from(move |e: InputEvent| {
+            let input = e.target_dyn_into::<HtmlInputElement>().unwrap();
+            on_password_change.emit(input.value());
+        })
+    };
+
     let on_submit = {
         let callback = props.on_submit.clone();
         Callback::from(move |_| callback.emit(()))
@@ -52,6 +62,13 @@ pub fn user_form(props: &UserFormProps) -> Html {
                 placeholder="Email"
                 value={props.email.clone()}
                 oninput={on_email_input}
+                class="border rounded px-4 py-2 mr-2"
+            />
+            <input
+                type="password"
+                placeholder="Password"
+                value={props.password.clone()}
+                oninput={on_password_input}
                 class="border rounded px-4 py-2 mr-2"
             />
             <button
@@ -78,9 +95,16 @@ pub struct UserListProps {
 #[function_component(UserList)]
 pub fn user_list(props: &UserListProps) -> Html {
     html! {
-        <div>
+        <div class="p-6">
             <h2 class="text-2xl font-bold text-gray-700 mb-2">{ "User List" }</h2>
-            <ul class="list-disc pl-5">
+            <div class="grid grid-cols-[50px_1fr_1fr_100px_100px] gap-4 px-4 py-2 bg-gray-100 font-bold text-gray-700 border-b">
+              <div>{ "ID" }</div>
+              <div>{ "Name" }</div>
+              <div>{ "Email" }</div>
+              <div>{ "" }</div>
+              <div>{ "" }</div>
+            </div>
+            <ul class="divide-y divide-gray-200">
                 { for props.users.iter().map(|user| {
                     html! { <UserListItem key={user.id} user={user.clone()} on_delete={props.on_delete.clone()} on_edit={props.on_edit.clone()} /> }
                 })}
@@ -111,19 +135,24 @@ pub fn user_list_item(props: &UserListItemProps) -> Html {
     };
 
     html! {
-        <li class="mb-2">
-            <span class="font-semibold">
-                { format!("ID: {}, Name: {}, Email: {}", props.user.id, props.user.name, props.user.email) }
+        <li class="grid grid-cols-[50px_1fr_1fr_100px_100px] gap-4 px-4 py-2 hover:bg-gray-50 items-center">
+            <span class="font-medium text-gray-900">
+                { format!("{}", props.user.id) }
+            </span>
+            <span class="font-medium text-gray-900">
+                { format!("{}", props.user.name) }
+            </span> <span class="font-medium text-gray-900">
+                { format!("{}", props.user.email) }
             </span>
             <button
                 onclick={on_delete}
-                class="ml-4 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                class=" bg-red-500 hover:bg-red-700 text-white py-1 px-2 rounded"
             >
                 { "Delete" }
             </button>
             <button
                 onclick={on_edit}
-                class="ml-4 bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded"
+                class=" bg-yellow-500 hover:bg-yellow-700 text-white  py-1 px-2 rounded"
             >
                 { "Edit" }
             </button>
@@ -166,15 +195,18 @@ mod tests {
         let props1 = UserFormProps {
             name: "John".to_string(),
             email: "john@example.com".to_string(),
+            password: "password123".to_string(),
             is_editing: false,
             on_name_change: Callback::noop(),
             on_email_change: Callback::noop(),
+            on_password_change: Callback::noop(),
             on_submit: Callback::noop(),
             message: "Success".to_string(),
         };
 
         assert_eq!(props1.name, "John");
         assert_eq!(props1.email, "john@example.com");
+        assert_eq!(props1.password, "password123");
         assert!(!props1.is_editing);
     }
 

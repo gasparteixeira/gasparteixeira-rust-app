@@ -34,9 +34,15 @@ mod integration_tests {
 
         state.name = "Test User".to_string();
         state.email = "test@example.com".to_string();
+        state.password = "password123".to_string();
         assert!(state.is_valid());
 
-        state.set_for_editing(1, "Updated".to_string(), "updated@test.com".to_string());
+        state.set_for_editing(
+            1,
+            "Updated".to_string(),
+            "updated@test.com".to_string(),
+            "newpass".to_string(),
+        );
         assert!(state.is_editing());
         assert_eq!(state.editing_id, Some(1));
 
@@ -65,6 +71,7 @@ mod integration_tests {
         let mut valid_state = UserFormState::new();
         valid_state.name = "John".to_string();
         valid_state.email = "john@example.com".to_string();
+        valid_state.password = "password123".to_string();
         assert!(valid_state.is_valid());
     }
 
@@ -73,6 +80,7 @@ mod integration_tests {
         let mut state = UserFormState::new();
         state.name = "Test".to_string();
         state.email = "test@test.com".to_string();
+        state.password = "password".to_string();
 
         assert!(!state.is_editing());
 
@@ -99,8 +107,12 @@ mod integration_tests {
 
     #[test]
     fn test_state_cloning() {
-        let state1 =
-            UserFormState::with_values("John".to_string(), "john@example.com".to_string(), Some(1));
+        let state1 = UserFormState::with_values(
+            "John".to_string(),
+            "john@example.com".to_string(),
+            "password123".to_string(),
+            Some(1),
+        );
 
         let state2 = state1.clone();
         assert_eq!(state1, state2);

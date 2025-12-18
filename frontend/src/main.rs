@@ -114,7 +114,8 @@ fn app() -> Html {
         Callback::from(move |id: i32| {
             if let Some(user) = users.iter().find(|u| u.id == id) {
                 let mut new_state = (*form_state).clone();
-                new_state.set_for_editing(id, user.name.clone(), user.email.clone());
+                // Note: Password is not included for security reasons - user must enter new password
+                new_state.set_for_editing(id, user.name.clone(), user.email.clone(), String::new());
                 form_state.set(new_state);
             }
         })
@@ -139,6 +140,15 @@ fn app() -> Html {
         })
     };
 
+    let on_password_change = {
+        let form_state = form_state.clone();
+        Callback::from(move |password: String| {
+            let mut new_state = (*form_state).clone();
+            new_state.password = password;
+            form_state.set(new_state);
+        })
+    };
+
     // Render UI
     html! {
         <div class="container mx-auto p-4">
@@ -147,9 +157,11 @@ fn app() -> Html {
             <UserForm
                 name={form_state.name.clone()}
                 email={form_state.email.clone()}
+                password={form_state.password.clone()}
                 is_editing={form_state.is_editing()}
                 on_name_change={on_name_change}
                 on_email_change={on_email_change}
+                on_password_change={on_password_change}
                 on_submit={submit_user}
                 message={(*message).clone()}
             />

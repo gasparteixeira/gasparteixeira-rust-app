@@ -19,6 +19,7 @@ pub struct User {
 pub struct CreateUserRequest {
     pub name: String,
     pub email: String,
+    pub password: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -26,6 +27,7 @@ pub struct UpdateUserRequest {
     pub id: i32,
     pub name: String,
     pub email: String,
+    pub password: String,
 }
 
 // Result type for API operations
@@ -86,7 +88,8 @@ impl UserApiClient for HttpUserApiClient {
         spawn_local(async move {
             let user_data = serde_json::json!({
                 "name": request.name,
-                "email": request.email
+                "email": request.email,
+                "password": request.password
             });
 
             match Request::post(&url)
@@ -105,12 +108,16 @@ impl UserApiClient for HttpUserApiClient {
     fn update_user(&self, request: UpdateUserRequest, callback: Callback<ApiResult<()>>) {
         let url = format!("{}/users/{}", self.base_url, request.id);
         spawn_local(async move {
+            let user_data = serde_json::json!({
+                "id": request.id,
+                "name": request.name,
+                "email": request.email,
+                "password": request.password
+            });
+            
             match Request::put(&url)
                 .header("Content-Type", "application/json")
-                .body(
-                    serde_json::to_string(&(request.id, request.name.as_str(), request.email.as_str()))
-                        .unwrap(),
-                )
+                .body(user_data.to_string())
                 .send()
                 .await
             {
@@ -165,9 +172,11 @@ mod tests {
         let request = CreateUserRequest {
             name: "New User".to_string(),
             email: "new@example.com".to_string(),
+            password: "password123".to_string(),
         };
         assert_eq!(request.name, "New User");
         assert_eq!(request.email, "new@example.com");
+        assert_eq!(request.password, "password123");
     }
 
     #[test]
@@ -176,10 +185,12 @@ mod tests {
             id: 1,
             name: "Updated User".to_string(),
             email: "updated@example.com".to_string(),
+            password: "newpassword".to_string(),
         };
         assert_eq!(request.id, 1);
         assert_eq!(request.name, "Updated User");
         assert_eq!(request.email, "updated@example.com");
+        assert_eq!(request.password, "newpassword");
     }
 
     #[test]
